@@ -4,7 +4,7 @@ import shutil
 import random
 
 
-src_dir = 'cropped_img'
+src_dir = 'your_dataset/cmqs'
 
 dst_base = 'dataset'
 train_ratio = 0.8

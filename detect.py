@@ -50,7 +50,7 @@ def segment_and_crop_cmqs(image_path, model, class_id=0):
     return cropped_images
 
 
-def process_folder(input_folder, output_folder, model_path='best.pt', class_id=0):
+def process_folder(input_folder, output_folder, model_path='model_segment.pt', class_id=0):
 
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
@@ -76,7 +76,7 @@ def process_folder(input_folder, output_folder, model_path='best.pt', class_id=0
             print(f"Đã lưu: {save_path}")
 
 
-input_folder = 'img_test'
+input_folder = 'cmsq_data'
 output_folder = 'cropped_img'
 
-process_folder(input_folder, output_folder, model_path='best.pt', class_id=0)
+process_folder(input_folder, output_folder, model_path='model_segment.pt', class_id=0)
