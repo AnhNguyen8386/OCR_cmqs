@@ -1,5 +1,0 @@
-path: your_dataset
-train: cmqs/train
-val: cmqs/val
-nc: 6
-names: ["Số ID", "Họ tên", "Cấp bậc", "Đơn vị cấp", "Ngày cấp", "Hạn sử dụng"]

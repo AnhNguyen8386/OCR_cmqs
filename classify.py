@@ -3,8 +3,8 @@ from torchvision import models, transforms
 from PIL import Image
 import os
 
-MODEL_PATH = 'best_model.pth'
-INPUT_FOLDER = 'cmqs'
+MODEL_PATH = 'model_classify.pth'
+INPUT_FOLDER = 'cropped_img'
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 

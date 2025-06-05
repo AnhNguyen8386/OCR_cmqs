@@ -1,0 +1,14 @@
+2021-09-14T083339.851651_cmsq_front_1820_cropped_0_So_ID_1.png	10
+2021-09-14T083339.851651_cmsq_front_1820_cropped_0_So_ID_2.png	060
+2021-09-14T083339.851651_cmsq_front_1820_cropped_0_So_ID_3.png	916
+2021-09-14T083339.851651_cmsq_front_1820_cropped_0_Ho_ten_1.png	BÀN
+2021-09-14T083339.851651_cmsq_front_1820_cropped_0_Ho_ten_2.png	VĂN
+2021-09-14T083339.851651_cmsq_front_1820_cropped_0_Ho_ten_3.png	GIỚI
+2021-09-14T083339.851651_cmsq_front_1820_cropped_0_Cap_bac_1.png	Cấp
+2021-09-14T083339.851651_cmsq_front_1820_cropped_0_Cap_bac_2.png	úy
+2021-09-14T083339.851651_cmsq_front_1820_cropped_0_Don_vi_cap_1.png	Quân
+2021-09-14T083339.851651_cmsq_front_1820_cropped_0_Don_vi_cap_2.png	khu:2
+2021-09-14T083339.851651_cmsq_front_1820_cropped_0_Ngay_cap_1.png	15
+2021-09-14T083339.851651_cmsq_front_1820_cropped_0_Ngay_cap_2.png	12
+2021-09-14T083339.851651_cmsq_front_1820_cropped_0_Ngay_cap_3.png	2010
+2021-09-14T083339.851651_cmsq_front_1820_cropped_0_Han_su_dung_1.png	12/2023
