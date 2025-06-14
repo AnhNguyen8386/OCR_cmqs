@@ -13,6 +13,7 @@ DETECT_MODEL_PATH = "app/models/detect_model.pt"
 
 def load_vietocr():
     config = Cfg.load_config_from_name("vgg_transformer")
+    config['weights'] = 'vietocr/weights/vgg19_bn-c79401a0.pth'
     config['device'] = 'cpu'
     config['predictor']['beamsearch'] = True
     return Predictor(config)
