@@ -1,4 +1,3 @@
-import os
 import torch
 from PIL import Image
 from torchvision import models, transforms
@@ -6,11 +5,11 @@ from ultralytics import YOLO
 from vietocr.tool.predictor import Predictor
 from vietocr.tool.config import Cfg
 from collections import defaultdict
+import os
 
 SEGMENT_MODEL_PATH = "app/models/model_segment.pt"
 CLASSIFY_MODEL_PATH = "app/models/model_classify.pth"
 DETECT_MODEL_PATH = "app/models/detect_model.pt"
-
 
 def load_vietocr():
     config = Cfg.load_config_from_name("vgg_transformer")
@@ -19,13 +18,13 @@ def load_vietocr():
     return Predictor(config)
 
 vietocr = load_vietocr()
-yolo_segment = YOLO(SEGMENT_MODEL)
-yolo_detect = YOLO(DETECT_MODEL)
+yolo_segment = YOLO(SEGMENT_MODEL_PATH)
+yolo_detect = YOLO(DETECT_MODEL_PATH)
 
-def load_image(image_path):
-    if not os.path.exists(image_path):
-        raise FileNotFoundError(f"Lỗi ảnh: {image_path}")
-    return Image.open(image_path).convert("RGB")
+model_rotate = models.resnet18(weights=None)
+model_rotate.fc = torch.nn.Linear(model_rotate.fc.in_features, 2)
+model_rotate.load_state_dict(torch.load(CLASSIFY_MODEL_PATH, map_location="cpu"))
+model_rotate.eval()
 
 def detect_cmqs_region(image):
     results = yolo_segment.predict(image, conf=0.5)
@@ -38,28 +37,18 @@ def crop_image(image, box):
     return image.crop(box)
 
 def fix_rotation(image):
-    model = models.resnet18(weights=None)
-    model.fc = torch.nn.Linear(model.fc.in_features, 2)
-    model.load_state_dict(torch.load(CLASSIFY_MODEL, map_location="cpu"))
-    model.eval()
-
     transform = transforms.Compose([
         transforms.Resize((224, 224)),
         transforms.ToTensor()
     ])
     input_tensor = transform(image).unsqueeze(0)
-
     with torch.no_grad():
-        prediction = torch.argmax(model(input_tensor), dim=1).item()
-
-    if prediction == 1:
-        return image.rotate(180)
-    return image
+        pred = torch.argmax(model_rotate(input_tensor), dim=1).item()
+    return image.rotate(180) if pred == 1 else image
 
 def detect_fields(image):
     results = yolo_detect.predict(image, conf=0.4)[0]
     fields = []
-
     for box in results.boxes:
         x1, y1, x2, y2 = map(int, box.xyxy[0])
         label = results.names[int(box.cls[0])]
@@ -76,53 +65,53 @@ def ocr_boxes(image, fields):
         field['cy'] = (y1 + y2) / 2
     return fields
 
-def merge_boxes_by_label_and_position(fields, x_thresh=40, y_thresh=25):
+def merge_boxes_by_label_and_position(fields, y_thresh=25):
     grouped = defaultdict(list)
     for field in fields:
         grouped[field['label']].append(field)
 
     merged_result = {}
     for label, items in grouped.items():
-        items.sort(key=lambda f: (f['cy'], f['cx']))
-        lines = []
-        current_line = [items[0]]
 
-        for field in items[1:]:
+        items.sort(key=lambda f: f['cy'])
+
+        lines = []
+        current_line = []
+
+        for field in items:
+            if not current_line:
+                current_line.append(field)
+                continue
+
             last = current_line[-1]
             same_line = abs(field['cy'] - last['cy']) < y_thresh
-            close_enough = abs(field['cx'] - last['cx']) < x_thresh
 
-            if same_line and close_enough:
+            if same_line:
                 current_line.append(field)
             else:
-                # Ghép thành dòng
-                line_text = ' '.join(word['text'] for word in current_line)
-                lines.append(line_text)
+                current_line.sort(key=lambda f: f['cx'])
+                lines.append(' '.join(w['text'] for w in current_line))
                 current_line = [field]
 
         if current_line:
-            lines.append(' '.join(word['text'] for word in current_line))
+            current_line.sort(key=lambda f: f['cx'])
+            lines.append(' '.join(w['text'] for w in current_line))
 
-        # Gộp các dòng lại
         merged_result[label] = ' '.join(lines)
 
     return merged_result
 
-def process_image(image_path):
-    image = load_image(image_path)
+def process_image(image: Image.Image):
     region_box = detect_cmqs_region(image)
     if region_box is None:
-        print("Không phát hiện cmqs")
-        return {}
+        raise ValueError("Không phát hiện được vùng CMQS")
+
     image = crop_image(image, region_box)
     image = fix_rotation(image)
     fields = detect_fields(image)
     fields = ocr_boxes(image, fields)
     result = merge_boxes_by_label_and_position(fields)
-    return result
-if __name__ == "__main__":
-    image_path = "test_img.jpg"
-    result = process_image(image_path)
-    print("Thông tin :")
-    for label, text in result.items():
-        print(f"{label}: {text}")
+
+    label_order = ['Số ID', 'Họ tên', 'Cấp bậc', 'Đơn vị cấp', 'Hạn sử dụng']
+    ordered_result = {label: result[label] for label in label_order if label in result}
+    return ordered_result
