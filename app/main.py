@@ -1,7 +1,12 @@
 from fastapi import FastAPI, UploadFile, File
 from PIL import Image
 from io import BytesIO
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
 from ocr_pipeline import process_image
+
 app = FastAPI()
 @app.post("/ocr/")
 def ocr_api(file: UploadFile = File(...)):
